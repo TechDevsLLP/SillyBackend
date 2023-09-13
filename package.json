@@ -1,0 +1,28 @@
+{
+	"name": "silly-backend",
+	"version": "1.0.0",
+	"description": "backend for silly community",
+	"main": "server.js",
+	"type": "module",
+	"scripts": {
+		"start": "nodemon server.js",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@mailchimp/mailchimp_marketing": "^3.0.80",
+		"axios": "^1.5.0",
+		"dayjs": "^1.11.9",
+		"express": "^4.18.2",
+		"joi": "^17.9.2",
+		"mongoose": "^7.0.3",
+		"morgan": "^1.10.0",
+		"nodemailer": "^6.9.5"
+	},
+	"devDependencies": {
+		"chalk": "^4.1.2",
+		"dotenv": "^16.0.3",
+		"nodemon": "^2.0.20"
+	}
+}
