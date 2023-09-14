@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { handleContactUs, handleNewsletter } from "../controllers/index.js";
+import {
+	handleContactUs,
+	handleNewsletter,
+	getMenuItemsForCategory,
+	handleGetAllCategories,
+	handlePostCategories,
+} from "../controllers/index.js";
 
 export function setupRoutes(app) {
 	const router = Router();
@@ -12,7 +18,13 @@ export function setupRoutes(app) {
 
 	router.post("/newsletter", handleNewsletter);
 
-	// router.post("/menu/insertBulk", handleDbInsert);
+	// CATEGORIES ROUTES
+	router.get("/categories/:location", handleGetAllCategories);
+
+	router.post("/categories/:location", handlePostCategories);
+
+	// MENU ROUTES
+	router.get("/menu/:location/:category", getMenuItemsForCategory);
 
 	app.use("/", router);
 }

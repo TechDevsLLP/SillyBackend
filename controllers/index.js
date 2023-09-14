@@ -1,6 +1,12 @@
 import Joi from "joi";
-import { saveContactInquiry } from "../models/index.js";
+import {
+	saveContactInquiry,
+	getMenuByCategory,
+	getAllCategories,
+	createOrUpdateCategories,
+} from "../models/index.js";
 import { contactFormSchemaValidate } from "../models/contact.schema.js";
+import { categorySchemaValidate } from "../models/category.schema.js";
 import { transporter } from "../config/nodemailer.js";
 import { SENDER_MAIL_ID } from "../config/secrets.js";
 import { subscribe } from "../utils/index.js";
@@ -29,6 +35,7 @@ export async function handleContactUs(req, res, next) {
 			transporter.sendMail(mailOptions, (err, info) => {
 				if (err) return next(err);
 				return res.status(200).json({
+					success: true,
 					message: "Contact form inquiry saved and sent successfully.",
 				});
 			});
@@ -51,12 +58,76 @@ export async function handleNewsletter(req, res, next) {
 		const result = await subscribe(value.email);
 
 		if (result.success) {
-			return res
-				.status(200)
-				.json({ message: "Successfully subscribed to the newsletter." });
+			return res.status(200).json({
+				success: true,
+				message: "Successfully subscribed to the newsletter.",
+			});
 		} else {
 			return next(result.error);
 		}
+	} catch (error) {
+		return next(error);
+	}
+}
+
+// CATEGORIES CONTROLLERS
+export async function handleGetAllCategories(req, res, next) {
+	const { location } = req.params;
+
+	try {
+		const result = await getAllCategories(location);
+
+		if (result.success) {
+			const categories = result.data.categories;
+			res.status(200).json({
+				success: true,
+				data: categories,
+			});
+		} else return next(result.error);
+	} catch (error) {
+		return next(error);
+	}
+}
+
+// create or update
+export async function handlePostCategories(req, res, next) {
+	const { location } = req.params;
+
+	const { categories } = req.body;
+
+	const { error, value } = Joi.object({
+		categories: Joi.array().items(categorySchemaValidate).required(),
+	}).validate({ categories });
+
+	if (error) return next(error);
+
+	try {
+		const result = await createOrUpdateCategories(location, value.categories);
+
+		if (result.success) {
+			res.status(201).json({
+				success: true,
+				data: result.data,
+			});
+		} else return next(result.error);
+	} catch (error) {
+		return next(error);
+	}
+}
+
+// MENU CONTROLLERS
+export async function getMenuItemsForCategory(req, res, next) {
+	const { location, category } = req.params;
+
+	try {
+		const result = await getMenuByCategory(location, category);
+
+		if (result.success) {
+			res.status(200).json({
+				success: true,
+				data: result.data,
+			});
+		} else return next(result.error);
 	} catch (error) {
 		return next(error);
 	}
