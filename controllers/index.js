@@ -1,12 +1,18 @@
 import Joi from "joi";
 import {
 	saveContactInquiry,
-	getMenuByCategory,
 	getAllCategories,
 	createOrUpdateCategories,
+	getMenuByCategory,
+	addMenuItem,
+	addMultipleMenuItems,
+	updateMenuItem,
+	updateMultipleMenuItems,
+	deleteMenuItemSingle,
 } from "../models/index.js";
 import { contactFormSchemaValidate } from "../models/contact.schema.js";
 import { categorySchemaValidate } from "../models/category.schema.js";
+import { menuItemSchemaValidate } from "../models/menu.schema.js";
 import { transporter } from "../config/nodemailer.js";
 import { SENDER_MAIL_ID } from "../config/secrets.js";
 import { subscribe } from "../utils/index.js";
@@ -116,7 +122,7 @@ export async function handlePostCategories(req, res, next) {
 }
 
 // MENU CONTROLLERS
-export async function getMenuItemsForCategory(req, res, next) {
+export async function handleGetMenuItems(req, res, next) {
 	const { location, category } = req.params;
 
 	try {
@@ -131,4 +137,116 @@ export async function getMenuItemsForCategory(req, res, next) {
 	} catch (error) {
 		return next(error);
 	}
+}
+
+export async function handlePostMenuItemSingle(req, res, next) {
+	const { location } = req.params;
+
+	const { error, value } = menuItemSchemaValidate.validate(req.body);
+
+	if (error) return next(error);
+
+	try {
+		const result = await addMenuItem({
+			location,
+			...value,
+		});
+
+		if (result.success)
+			res.status(201).json({
+				success: true,
+				data: result.data,
+			});
+		else return next(result.error);
+	} catch (error) {
+		return next(error);
+	}
+}
+
+export async function handlePostMenuItemMultiple(req, res, next) {
+	const { location } = req.params;
+	const menuItems = req.body;
+
+	const { error, value } = Joi.array()
+		.items(menuItemSchemaValidate)
+		.validate(menuItems);
+
+	if (error) return next(error);
+
+	try {
+		const result = await addMultipleMenuItems(location, value);
+
+		if (result.success)
+			return res.status(201).json({
+				success: true,
+				data: result.data,
+			});
+		else return next(result.error);
+	} catch (error) {
+		return next(error);
+	}
+}
+
+export async function handleUpdateMenuItemSingle(req, res, next) {
+	const { location, id } = req.params;
+	const updatedMenuItemData = req.body;
+
+	try {
+		const result = await updateMenuItem(location, id, updatedMenuItemData);
+
+		if (result.success)
+			return res.status(200).json({
+				success: true,
+				data: result.data,
+			});
+		else return next(result.error);
+	} catch (error) {
+		return next(error);
+	}
+}
+
+export async function handleUpdateMenuItemMultiple(req, res, next) {
+	const { location } = req.params;
+	const updatedMenuItems = req.body;
+
+	try {
+		const result = await updateMultipleMenuItems(location, updatedMenuItems);
+
+		if (result.success) {
+			res.status(200).json({
+				success: true,
+				data: result.data,
+			});
+		} else {
+			return next(result.error);
+		}
+	} catch (error) {
+		return next(error);
+	}
+}
+
+export async function handleDeleteMenuItemSingle(req, res, next) {
+	const { location, id } = req.params;
+
+	try {
+		const result = await deleteMenuItemSingle(location, id);
+
+		if (result.success) {
+			res.status(200).json({
+				success: true,
+				message: "Menu item deleted successfully.",
+			});
+		} else {
+			res.status(404).json({
+				success: false,
+				message: "Menu item not found or already deleted.",
+			});
+		}
+	} catch (error) {
+		return next(error);
+	}
+}
+
+export async function handleDeleteMenuItemMultiple(req, res, next) {
+	const { location } = req.params;
 }
