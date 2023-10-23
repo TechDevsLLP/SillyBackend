@@ -19,6 +19,10 @@ const contactFormSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
+		region: {
+			type: String,
+			required: true,
+		},
 	},
 	{ timestamps: true, collection: "contacts" }
 );
@@ -32,4 +36,5 @@ export const contactFormSchemaValidate = Joi.object({
 		.pattern(/^[0-9]{10}$/)
 		.required(),
 	body: Joi.string().required(),
+	region: Joi.string().required(),
 });

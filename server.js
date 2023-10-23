@@ -2,6 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import chalk from "chalk";
 import { setupRoutes } from "./routes/index.js";
+import cors from "cors";
 import { PORT } from "./config/secrets.js";
 import { setupMongo } from "./config/mongo.js";
 import dayjs from "dayjs";
@@ -37,6 +38,8 @@ app.use(
 		"[:date] | :coloredMethod :url :coloredStatus :res[content-length] bytes :response-time ms"
 	)
 );
+
+app.use(cors());
 
 setupRoutes(app);
 

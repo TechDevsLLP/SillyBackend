@@ -8,4 +8,5 @@ export const {
 	MAILCHIMP_API_KEY,
 	MAILCHIMP_LIST_ID,
 	MAILCHIMP_SERVER_PREFIX,
+	MONGO_URI,
 } = process.env;

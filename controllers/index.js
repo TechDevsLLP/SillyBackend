@@ -1,9 +1,12 @@
 import Joi from "joi";
 import {
 	saveContactInquiry,
+	getAllLocationCats,
 	getAllCategories,
 	createOrUpdateCategories,
 	getMenuByCategory,
+	getMenuSubcategories,
+	getCatMeta,
 	addMenuItem,
 	addMultipleMenuItems,
 	updateMenuItem,
@@ -26,24 +29,30 @@ export async function handleContactUs(req, res, next) {
 		const result = await saveContactInquiry(value);
 
 		if (result.success) {
-			const mailOptions = {
-				from: SENDER_MAIL_ID, // Your email address
-				to: "your-email@gmail.com", // Recipient's email address
-				subject: `CONTACT US - ${value.name}`,
-				text: `
-         Name: ${value.name}
-         Email: ${value.email}
-         Phone: ${value.phone}
-         Message: ${value.body}
-       `,
-			};
+			// const mailOptions = {
+			// 	from: SENDER_MAIL_ID, // Your email address
+			// 	to: "your-email@gmail.com", // Recipient's email address
+			// 	subject: `CONTACT US - ${value.name}`,
+			// 	text: `
+			//       Name: ${value.name}
+			//       Email: ${value.email}
+			//       Phone: ${value.phone}
+			//       Message: ${value.body}
+			// 						Region: ${value.region}
+			//     `,
+			// };
 
-			transporter.sendMail(mailOptions, (err, info) => {
-				if (err) return next(err);
-				return res.status(200).json({
-					success: true,
-					message: "Contact form inquiry saved and sent successfully.",
-				});
+			// transporter.sendMail(mailOptions, (err, info) => {
+			// 	if (err) return next(err);
+			// 	return res.status(200).json({
+			// 		success: true,
+			// 		message: "Contact form inquiry saved and sent successfully.",
+			// 	});
+			// });
+
+			return res.status(200).json({
+				success: true,
+				message: "Contact form inquiry saved and sent successfully.",
 			});
 		} else {
 			return next(result.error);
@@ -77,6 +86,21 @@ export async function handleNewsletter(req, res, next) {
 }
 
 // CATEGORIES CONTROLLERS
+export async function handleAllLocationCategories(req, res, next) {
+	try {
+		const result = await getAllLocationCats();
+
+		if (result.success) {
+			res.status(200).json({
+				success: true,
+				data: result.data,
+			});
+		} else return next(result.error);
+	} catch (error) {
+		return next(error);
+	}
+}
+
 export async function handleGetAllCategories(req, res, next) {
 	const { location } = req.params;
 
@@ -84,7 +108,7 @@ export async function handleGetAllCategories(req, res, next) {
 		const result = await getAllCategories(location);
 
 		if (result.success) {
-			const categories = result.data.categories;
+			const categories = result.data;
 			res.status(200).json({
 				success: true,
 				data: categories,
@@ -127,6 +151,40 @@ export async function handleGetMenuItems(req, res, next) {
 
 	try {
 		const result = await getMenuByCategory(location, category);
+
+		if (result.success) {
+			res.status(200).json({
+				success: true,
+				data: result.data,
+			});
+		} else return next(result.error);
+	} catch (error) {
+		return next(error);
+	}
+}
+
+export async function handleGetMenuItemSubcategories(req, res, next) {
+	const { location, category } = req.params;
+
+	try {
+		const result = await getMenuSubcategories(location, category);
+
+		if (result.success) {
+			res.status(200).json({
+				success: true,
+				data: result.data,
+			});
+		} else return next(result.error);
+	} catch (error) {
+		return next(error);
+	}
+}
+
+export async function handleCategoryMeta(req, res, next) {
+	const { location, category } = req.params;
+
+	try {
+		const result = await getCatMeta(location, category);
 
 		if (result.success) {
 			res.status(200).json({

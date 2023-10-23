@@ -2,9 +2,12 @@ import { Router } from "express";
 import {
 	handleContactUs,
 	handleNewsletter,
+	handleAllLocationCategories,
 	handleGetAllCategories,
 	handlePostCategories,
 	handleGetMenuItems,
+	handleGetMenuItemSubcategories,
+	handleCategoryMeta,
 	handlePostMenuItemSingle,
 	handlePostMenuItemMultiple,
 	handleUpdateMenuItemSingle,
@@ -25,12 +28,21 @@ export function setupRoutes(app) {
 	router.post("/newsletter", handleNewsletter);
 
 	// CATEGORIES ROUTES
+	router.get("/categories/all", handleAllLocationCategories);
+
 	router.get("/categories/:location", handleGetAllCategories);
 
 	router.post("/categories/:location", handlePostCategories);
 
 	// MENU ROUTES
 	router.get("/menu/:location/:category", handleGetMenuItems);
+
+	router.get(
+		"/menu/:location/:category/subcategories",
+		handleGetMenuItemSubcategories
+	);
+
+	router.get("/menu/:location/:category/meta", handleCategoryMeta);
 
 	router.post("/menu/:location/single", handlePostMenuItemSingle);
 

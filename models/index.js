@@ -5,6 +5,7 @@ import { Category } from "./category.schema.js";
 export async function saveContactInquiry(formData) {
 	try {
 		const newEntry = new Contact(formData);
+		console.log(newEntry);
 		await newEntry.save();
 		return {
 			success: true,
@@ -16,12 +17,36 @@ export async function saveContactInquiry(formData) {
 }
 
 // CATEGORIES
-export async function getAllCategories(location) {
+export async function getAllLocationCats(location) {
 	try {
-		const category = await Category.findOne({ location });
+		const resp = await Category.find();
+		console.log(resp);
+		// const data = resp.categories.map((cat) => {
+		// 	if (cat.visible) return cat.name;
+		// });
+
 		return {
 			success: true,
-			data: category,
+			data,
+		};
+	} catch (error) {
+		return {
+			success: false,
+			error: error,
+		};
+	}
+}
+
+export async function getAllCategories(location) {
+	try {
+		const resp = await Category.findOne({ location });
+		const data = resp.categories.map((cat) => {
+			if (cat.visible) return cat.name;
+		});
+
+		return {
+			success: true,
+			data,
 		};
 	} catch (error) {
 		return {
@@ -71,6 +96,45 @@ export async function getMenuByCategory(location, category) {
 	}
 }
 
+export async function getMenuSubcategories(location, category) {
+	try {
+		// Use the 'distinct' method to get unique subcategories for the specified category
+		const subcategories = await Menu.distinct("subcategory", {
+			location,
+			category,
+			visible: true,
+		});
+
+		return {
+			success: true,
+			data: subcategories,
+		};
+	} catch (error) {
+		return {
+			success: false,
+			error: error,
+		};
+	}
+}
+
+export async function getCatMeta(location, category) {
+	try {
+		const resp = await Category.findOne({ location });
+		const data = resp.categories.filter((cat) => cat.name === category);
+		const meta = data[0].desc;
+
+		return {
+			success: true,
+			data: meta,
+		};
+	} catch (error) {
+		return {
+			success: false,
+			error: error,
+		};
+	}
+}
+
 export async function addMenuItem(menuItemData) {
 	try {
 		const newMenuItem = new Menu(menuItemData);
@@ -91,7 +155,11 @@ export async function addMenuItem(menuItemData) {
 export async function addMultipleMenuItems(location, menuItems) {
 	try {
 		const createdMenuItems = await Menu.insertMany(
-			menuItems.map((item) => ({ ...item, location }))
+			menuItems.map((item) => ({
+				...item,
+				location,
+				price: item.price.toString(),
+			}))
 		);
 
 		return {

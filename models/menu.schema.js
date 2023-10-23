@@ -19,8 +19,8 @@ const menuSchema = new mongoose.Schema(
 		},
 		type: {
 			type: String,
-			enum: ["veg", "nonveg"],
-			required: true,
+			enum: ["veg", "nonveg", ""],
+			// required: true,
 			default: "veg",
 		},
 		desc: String,
@@ -50,8 +50,13 @@ export const Menu = mongoose.model("Menu", menuSchema);
 
 export const menuItemSchemaValidate = Joi.object({
 	name: Joi.string().required(),
-	price: Joi.number().min(0).required(),
-	type: Joi.string().valid("veg", "nonveg").default("veg"),
+	price: Joi.alternatives()
+		.try(
+			Joi.number().min(0), // Accepts a number greater than or equal to 0
+			Joi.string() // Accepts a string
+		)
+		.required(),
+	type: Joi.string().allow("").valid("veg", "nonveg").default("veg"),
 	desc: Joi.string().allow("").default(""), // Allow an empty string for 'desc'
 	subcategory: Joi.string().allow("").default(""),
 	options: Joi.string().allow("").default(""),
