@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
 	handleContactUs,
 	handleNewsletter,
+	handleStrucData,
 	handleAllLocationCategories,
 	handleGetAllCategories,
 	handlePostCategories,
@@ -26,6 +27,8 @@ export function setupRoutes(app) {
 	router.post("/contact-us", handleContactUs);
 
 	router.post("/newsletter", handleNewsletter);
+
+	router.get("/:location/structured-data", handleStrucData);
 
 	// CATEGORIES ROUTES
 	router.get("/categories/all", handleAllLocationCategories);

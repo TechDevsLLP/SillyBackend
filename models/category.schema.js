@@ -1,5 +1,5 @@
 import Joi from "joi";
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const categorySchema = new mongoose.Schema(
 	{
@@ -7,6 +7,10 @@ const categorySchema = new mongoose.Schema(
 			type: String,
 			required: true,
 			unique: true,
+		},
+		structuredData: {
+			type: Schema.Types.Mixed,
+			required: true,
 		},
 		categories: [
 			{

@@ -3,6 +3,7 @@ import {
 	saveContactInquiry,
 	getAllLocationCats,
 	getAllCategories,
+	getStructuredData,
 	createOrUpdateCategories,
 	getMenuByCategory,
 	getMenuSubcategories,
@@ -17,7 +18,7 @@ import { contactFormSchemaValidate } from "../models/contact.schema.js";
 import { categorySchemaValidate } from "../models/category.schema.js";
 import { menuItemSchemaValidate } from "../models/menu.schema.js";
 import { transporter } from "../config/nodemailer.js";
-import { SENDER_MAIL_ID } from "../config/secrets.js";
+import { SENDER_MAIL_ID, SEND_CONTACT_MAIL_TO } from "../config/secrets.js";
 import { subscribe } from "../utils/index.js";
 
 export async function handleContactUs(req, res, next) {
@@ -29,26 +30,26 @@ export async function handleContactUs(req, res, next) {
 		const result = await saveContactInquiry(value);
 
 		if (result.success) {
-			// const mailOptions = {
-			// 	from: SENDER_MAIL_ID, // Your email address
-			// 	to: "your-email@gmail.com", // Recipient's email address
-			// 	subject: `CONTACT US - ${value.name}`,
-			// 	text: `
-			//       Name: ${value.name}
-			//       Email: ${value.email}
-			//       Phone: ${value.phone}
-			//       Message: ${value.body}
-			// 						Region: ${value.region}
-			//     `,
-			// };
+			const mailOptions = {
+				from: SENDER_MAIL_ID, // Your email address
+				to: SEND_CONTACT_MAIL_TO, // Recipient's email address
+				subject: `CONTACT US - ${value.name}`,
+				text: `
+			      Name: ${value.name}
+			      Email: ${value.email}
+			      Phone: ${value.phone}
+			      Message: ${value.body}
+									Region: ${value.region}
+			    `,
+			};
 
-			// transporter.sendMail(mailOptions, (err, info) => {
-			// 	if (err) return next(err);
-			// 	return res.status(200).json({
-			// 		success: true,
-			// 		message: "Contact form inquiry saved and sent successfully.",
-			// 	});
-			// });
+			transporter.sendMail(mailOptions, (err, info) => {
+				if (err) return next(err);
+				return res.status(200).json({
+					success: true,
+					message: "Contact form inquiry saved and sent successfully.",
+				});
+			});
 
 			return res.status(200).json({
 				success: true,
@@ -65,17 +66,37 @@ export async function handleContactUs(req, res, next) {
 export async function handleNewsletter(req, res, next) {
 	const { error, value } = Joi.object({
 		email: Joi.string().email().required(),
+		region: Joi.string().required(),
 	}).validate(req.body);
 
 	if (error) return next(error);
 
 	try {
-		const result = await subscribe(value.email);
+		const result = await subscribe(value.email, value.region);
 
 		if (result.success) {
 			return res.status(200).json({
 				success: true,
-				message: "Successfully subscribed to the newsletter.",
+				message: result.message,
+			});
+		} else {
+			return next(result.error);
+		}
+	} catch (error) {
+		return next(error);
+	}
+}
+
+export async function handleStrucData(req, res, next) {
+	const { location } = req.params;
+
+	try {
+		const result = await getStructuredData(location);
+
+		if (result.success) {
+			return res.status(200).json({
+				success: true,
+				data: result.data,
 			});
 		} else {
 			return next(result.error);
@@ -123,16 +144,21 @@ export async function handleGetAllCategories(req, res, next) {
 export async function handlePostCategories(req, res, next) {
 	const { location } = req.params;
 
-	const { categories } = req.body;
+	const { categories, structuredData } = req.body;
 
 	const { error, value } = Joi.object({
-		categories: Joi.array().items(categorySchemaValidate).required(),
-	}).validate({ categories });
+		categories: Joi.array().items(categorySchemaValidate).optional(),
+		structuredData: Joi.object().optional(),
+	}).validate({ categories, structuredData });
 
 	if (error) return next(error);
 
 	try {
-		const result = await createOrUpdateCategories(location, value.categories);
+		const result = await createOrUpdateCategories(
+			location,
+			value.categories,
+			value.structuredData
+		);
 
 		if (result.success) {
 			res.status(201).json({

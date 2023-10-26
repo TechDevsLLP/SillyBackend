@@ -5,7 +5,6 @@ import { Category } from "./category.schema.js";
 export async function saveContactInquiry(formData) {
 	try {
 		const newEntry = new Contact(formData);
-		console.log(newEntry);
 		await newEntry.save();
 		return {
 			success: true,
@@ -56,14 +55,36 @@ export async function getAllCategories(location) {
 	}
 }
 
-export async function createOrUpdateCategories(location, categories) {
+export async function getStructuredData(location) {
+	try {
+		const resp = await Category.findOne({ location });
+		const data = resp.structuredData;
+
+		return {
+			success: true,
+			data,
+		};
+	} catch (error) {
+		return {
+			success: false,
+			error: error,
+		};
+	}
+}
+
+export async function createOrUpdateCategories(
+	location,
+	categories,
+	structuredData
+) {
 	try {
 		let existingCategory = await Category.findOne({ location });
 
 		if (!existingCategory) {
-			existingCategory = new Category({ location, categories });
+			existingCategory = new Category({ location, categories, structuredData });
 		} else {
 			existingCategory.categories = categories;
+			existingCategory.structuredData = structuredData;
 		}
 
 		const savedCategory = await existingCategory.save();
