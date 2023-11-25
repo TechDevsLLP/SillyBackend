@@ -1,6 +1,7 @@
 import { Contact } from "./contact.schema.js";
 import { Menu } from "./menu.schema.js";
 import { Category } from "./category.schema.js";
+import Subcategory from "./subcategory.schema.js";
 
 export async function saveContactInquiry(formData) {
 	try {
@@ -19,10 +20,6 @@ export async function saveContactInquiry(formData) {
 export async function getAllLocationCats(location) {
 	try {
 		const resp = await Category.find();
-		console.log(resp);
-		// const data = resp.categories.map((cat) => {
-		// 	if (cat.visible) return cat.name;
-		// });
 
 		return {
 			success: true,
@@ -119,17 +116,22 @@ export async function getMenuByCategory(location, category) {
 
 export async function getMenuSubcategories(location, category) {
 	try {
-		// Use the 'distinct' method to get unique subcategories for the specified category
-		const subcategories = await Menu.distinct("subcategory", {
-			location,
-			category,
-			visible: true,
-		});
+		const result = await Subcategory.findOne(
+			{ location, category },
+			"subcategories"
+		);
 
-		return {
-			success: true,
-			data: subcategories,
-		};
+		if (result) {
+			return {
+				success: true,
+				data: result.subcategories,
+			};
+		} else {
+			return {
+				success: true,
+				data: [],
+			};
+		}
 	} catch (error) {
 		return {
 			success: false,
