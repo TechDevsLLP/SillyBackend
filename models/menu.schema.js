@@ -50,6 +50,7 @@ export const Menu = mongoose.model("Menu", menuSchema);
 
 export const menuItemSchemaValidate = Joi.object({
 	name: Joi.string().required(),
+	location: Joi.string().optional(),
 	price: Joi.alternatives()
 		.try(
 			Joi.number().min(0), // Accepts a number greater than or equal to 0

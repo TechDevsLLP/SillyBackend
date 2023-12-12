@@ -15,6 +15,7 @@ import {
 	handleUpdateMenuItemMultiple,
 	handleDeleteMenuItemSingle,
 	handleDeleteMenuItemMultiple,
+	handleLogin,
 } from "../controllers/index.js";
 
 export function setupRoutes(app) {
@@ -58,6 +59,9 @@ export function setupRoutes(app) {
 	router.delete("/menu/:location/single/:id", handleDeleteMenuItemSingle);
 
 	router.delete("/menu/:location/multiple", handleDeleteMenuItemMultiple);
+
+	// ADMIN ROUTES
+	router.post("/admin/login", handleLogin);
 
 	app.use("/", router);
 }

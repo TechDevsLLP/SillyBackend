@@ -13,6 +13,8 @@ import {
 	updateMenuItem,
 	updateMultipleMenuItems,
 	deleteMenuItemSingle,
+	generateToken,
+	authenticateUser,
 } from "../models/index.js";
 import { contactFormSchemaValidate } from "../models/contact.schema.js";
 import { categorySchemaValidate } from "../models/category.schema.js";
@@ -20,6 +22,7 @@ import { menuItemSchemaValidate } from "../models/menu.schema.js";
 import { transporter } from "../config/nodemailer.js";
 import { SENDER_MAIL_ID, SEND_CONTACT_MAIL_TO } from "../config/secrets.js";
 import { subscribe } from "../utils/index.js";
+import { userSchemaValidate } from "../models/user.schema.js";
 
 export async function handleContactUs(req, res, next) {
 	const { error, value } = contactFormSchemaValidate.validate(req.body);
@@ -333,4 +336,34 @@ export async function handleDeleteMenuItemSingle(req, res, next) {
 
 export async function handleDeleteMenuItemMultiple(req, res, next) {
 	const { location } = req.params;
+}
+
+// ADMIN CONTROLLERS
+export async function handleLogin(req, res, next) {
+	const { error, value } = userSchemaValidate.validate(req.body);
+
+	if (error) return next(error);
+
+	const { username, password } = value;
+
+	try {
+		const authenticationResult = await authenticateUser(username, password);
+		console.log(authenticationResult);
+		if (authenticationResult.success) {
+			const { location, isSuperAdmin } = authenticationResult;
+			const token = await generateToken({ username, location, isSuperAdmin });
+
+			res.status(200).json({
+				success: true,
+				token,
+			});
+		} else {
+			res.status(401).json({
+				success: false,
+				message: authenticationResult.message,
+			});
+		}
+	} catch (error) {
+		return next(error);
+	}
 }

@@ -1,7 +1,10 @@
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { Contact } from "./contact.schema.js";
 import { Menu } from "./menu.schema.js";
 import { Category } from "./category.schema.js";
 import Subcategory from "./subcategory.schema.js";
+import { User } from "./user.schema.js";
 
 export async function saveContactInquiry(formData) {
 	try {
@@ -250,10 +253,13 @@ export async function updateMultipleMenuItems(location, updatedMenuItems) {
 
 export async function deleteMenuItemSingle(location, id) {
 	try {
-		const result = await Menu.deleteOne({ _id: id, location });
+		const result = await Menu.updateOne(
+			{ _id: id, location },
+			{ $set: { visible: false } }
+		);
 
 		return {
-			success: result.deletedCount === 1,
+			success: result.modifiedCount === 1,
 		};
 	} catch (error) {
 		return {
@@ -261,4 +267,42 @@ export async function deleteMenuItemSingle(location, id) {
 			error: error,
 		};
 	}
+}
+
+export async function authenticateUser(username, password) {
+	try {
+		const user = await User.findOne({ username });
+
+		if (user) {
+			const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+			if (isPasswordMatch) {
+				const { location, isSuperAdmin } = user;
+				return {
+					success: true,
+					location,
+					isSuperAdmin,
+				};
+			} else {
+				return {
+					success: false,
+					message: "Incorrect credentials",
+				};
+			}
+		} else {
+			return {
+				success: false,
+				message: "User does not exist",
+			};
+		}
+	} catch (error) {
+		return {
+			success: false,
+			error: error.message,
+		};
+	}
+}
+
+export async function generateToken(payload) {
+	return jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: "1d" });
 }
