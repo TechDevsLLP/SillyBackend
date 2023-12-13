@@ -177,9 +177,10 @@ export async function handlePostCategories(req, res, next) {
 // MENU CONTROLLERS
 export async function handleGetMenuItems(req, res, next) {
 	const { location, category } = req.params;
+	const { showArchived = "false" } = req.query;
 
 	try {
-		const result = await getMenuByCategory(location, category);
+		const result = await getMenuByCategory(location, category, showArchived);
 
 		if (result.success) {
 			res.status(200).json({

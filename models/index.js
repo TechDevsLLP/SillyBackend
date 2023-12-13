@@ -101,9 +101,11 @@ export async function createOrUpdateCategories(
 }
 
 // MENU
-export async function getMenuByCategory(location, category) {
+export async function getMenuByCategory(location, category, showArchived) {
 	try {
-		const menuItems = await Menu.find({ location, category, visible: true });
+		let menuItems = await Menu.find({ location, category });
+		if (showArchived === "false")
+			menuItems = menuItems.filter((item) => item.visible);
 
 		return {
 			success: true,
