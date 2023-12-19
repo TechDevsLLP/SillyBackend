@@ -16,7 +16,9 @@ import {
 	handleDeleteMenuItemSingle,
 	handleDeleteMenuItemMultiple,
 	handleLogin,
+	handleGallery,
 } from "../controllers/index.js";
+import { verifyToken } from "../middleware/index.js";
 
 export function setupRoutes(app) {
 	const router = Router();
@@ -30,6 +32,8 @@ export function setupRoutes(app) {
 	router.post("/newsletter", handleNewsletter);
 
 	router.get("/:location/structured-data", handleStrucData);
+
+	router.get("/:location/gallery", handleGallery);
 
 	// CATEGORIES ROUTES
 	router.get("/categories/all", handleAllLocationCategories);
@@ -48,20 +52,34 @@ export function setupRoutes(app) {
 
 	router.get("/menu/:location/:category/meta", handleCategoryMeta);
 
-	router.post("/menu/:location/single", handlePostMenuItemSingle);
+	// router.post("/menu/:location/single", handlePostMenuItemSingle);
 
 	router.post("/menu/:location/multiple", handlePostMenuItemMultiple);
 
-	router.patch("/menu/:location/single/:id", handleUpdateMenuItemSingle);
+	// router.patch("/menu/:location/single/:id", handleUpdateMenuItemSingle);
 
 	router.patch("/menu/:location/multiple", handleUpdateMenuItemMultiple);
 
-	router.delete("/menu/:location/single/:id", handleDeleteMenuItemSingle);
+	// router.delete("/menu/:location/single/:id", handleDeleteMenuItemSingle);
 
 	router.delete("/menu/:location/multiple", handleDeleteMenuItemMultiple);
 
 	// ADMIN ROUTES
-	router.post("/admin/login", handleLogin);
+	router.post("/login", handleLogin);
+
+	router.post("/menu/:location/single", verifyToken, handlePostMenuItemSingle);
+
+	router.patch(
+		"/menu/:location/single/:id",
+		verifyToken,
+		handleUpdateMenuItemSingle
+	);
+
+	router.delete(
+		"/menu/:location/single/:id",
+		verifyToken,
+		handleDeleteMenuItemSingle
+	);
 
 	app.use("/", router);
 }

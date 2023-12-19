@@ -23,6 +23,12 @@ import { transporter } from "../config/nodemailer.js";
 import { SENDER_MAIL_ID, SEND_CONTACT_MAIL_TO } from "../config/secrets.js";
 import { subscribe } from "../utils/index.js";
 import { userSchemaValidate } from "../models/user.schema.js";
+import {
+	photosDelhi,
+	photosDelhiSubset,
+	photosMumbai,
+	photosMumbaiSubset,
+} from "../utils/galleryImages.js";
 
 export async function handleContactUs(req, res, next) {
 	const { error, value } = contactFormSchemaValidate.validate(req.body);
@@ -107,6 +113,24 @@ export async function handleStrucData(req, res, next) {
 	} catch (error) {
 		return next(error);
 	}
+}
+
+export async function handleGallery(req, res, next) {
+	const { location } = req.params;
+	const { subset = "false" } = req.query;
+
+	console.log(photosDelhi);
+
+	if (subset == "true")
+		return res.status(200).json({
+			success: true,
+			data: location == "delhi" ? photosDelhiSubset : photosMumbaiSubset,
+		});
+
+	return res.status(200).json({
+		success: true,
+		data: location == "delhi" ? photosDelhi : photosMumbai,
+	});
 }
 
 // CATEGORIES CONTROLLERS
