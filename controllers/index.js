@@ -119,8 +119,6 @@ export async function handleGallery(req, res, next) {
 	const { location } = req.params;
 	const { subset = "false" } = req.query;
 
-	console.log(photosDelhi);
-
 	if (subset == "true")
 		return res.status(200).json({
 			success: true,
