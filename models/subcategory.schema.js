@@ -12,7 +12,7 @@ const subcategorySchema = new mongoose.Schema(
 			required: true,
 		},
 		subcategories: {
-			type: [[String, Boolean]],
+			type: [mongoose.Schema.Types.Mixed], // [["pizza", true], ["pasta", true]]
 			required: true,
 		},
 	},

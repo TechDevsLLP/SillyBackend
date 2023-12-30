@@ -132,7 +132,7 @@ export async function getMenuSubcategories(location, category, all = "false") {
 				all == "true"
 					? subcategories
 					: subcategories
-							.filter(([key, value]) => value === "true")
+							.filter(([key, value]) => value === true)
 							.map(([key, value]) => key);
 
 			return {
