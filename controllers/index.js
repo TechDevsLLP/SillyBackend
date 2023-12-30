@@ -15,6 +15,8 @@ import {
 	deleteMenuItemSingle,
 	generateToken,
 	authenticateUser,
+	updateMenuSubcategories,
+	postNewSubcategory,
 } from "../models/index.js";
 import { contactFormSchemaValidate } from "../models/contact.schema.js";
 import { categorySchemaValidate } from "../models/category.schema.js";
@@ -217,9 +219,10 @@ export async function handleGetMenuItems(req, res, next) {
 
 export async function handleGetMenuItemSubcategories(req, res, next) {
 	const { location, category } = req.params;
+	const { all = "false" } = req.query;
 
 	try {
-		const result = await getMenuSubcategories(location, category);
+		const result = await getMenuSubcategories(location, category, all);
 
 		if (result.success) {
 			res.status(200).json({
@@ -386,6 +389,45 @@ export async function handleLogin(req, res, next) {
 				message: authenticationResult.message,
 			});
 		}
+	} catch (error) {
+		return next(error);
+	}
+}
+
+export async function handleUpdateMenuItemSubcategories(req, res, next) {
+	const { location, category } = req.params;
+	const { subcategories } = req.body;
+
+	try {
+		const result = await updateMenuSubcategories(
+			location,
+			category,
+			subcategories
+		);
+
+		if (result.success) {
+			res.status(200).json({
+				success: true,
+			});
+		} else return next(result.error);
+	} catch (error) {
+		return next(error);
+	}
+}
+
+export async function handlePostNewSubcategory(req, res, next) {
+	const { location, category } = req.params;
+	const { subcat } = req.body;
+
+	try {
+		const result = await postNewSubcategory(location, category, subcat);
+
+		if (result.success) {
+			res.status(200).json({
+				success: true,
+				data: result.data,
+			});
+		} else return next(result.error);
 	} catch (error) {
 		return next(error);
 	}

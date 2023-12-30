@@ -17,6 +17,8 @@ import {
 	handleDeleteMenuItemMultiple,
 	handleLogin,
 	handleGallery,
+	handleUpdateMenuItemSubcategories,
+	handlePostNewSubcategory,
 } from "../controllers/index.js";
 import { verifyToken } from "../middleware/index.js";
 
@@ -79,6 +81,16 @@ export function setupRoutes(app) {
 		"/menu/:location/single/:id",
 		verifyToken,
 		handleDeleteMenuItemSingle
+	);
+
+	router.patch(
+		"/menu/:location/:category/subcategories",
+		handleUpdateMenuItemSubcategories
+	);
+
+	router.post(
+		"/menu/:location/:category/subcategories",
+		handlePostNewSubcategory
 	);
 
 	app.use("/", router);

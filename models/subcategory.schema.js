@@ -11,12 +11,10 @@ const subcategorySchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
-		subcategories: [
-			{
-				type: String,
-				required: true,
-			},
-		],
+		subcategories: {
+			type: [[String, Boolean]],
+			required: true,
+		},
 	},
 	{ timestamps: true, collection: "subcategories" }
 );

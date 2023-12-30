@@ -119,7 +119,7 @@ export async function getMenuByCategory(location, category, showArchived) {
 	}
 }
 
-export async function getMenuSubcategories(location, category) {
+export async function getMenuSubcategories(location, category, all = "false") {
 	try {
 		const result = await Subcategory.findOne(
 			{ location, category },
@@ -127,9 +127,17 @@ export async function getMenuSubcategories(location, category) {
 		);
 
 		if (result) {
+			const { subcategories } = result;
+			const data =
+				all == "true"
+					? subcategories
+					: subcategories
+							.filter(([key, value]) => value === "true")
+							.map(([key, value]) => key);
+
 			return {
 				success: true,
-				data: result.subcategories,
+				data,
 			};
 		} else {
 			return {
@@ -307,4 +315,57 @@ export async function authenticateUser(username, password) {
 
 export async function generateToken(payload) {
 	return jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: "1d" });
+}
+
+export async function updateMenuSubcategories(
+	location,
+	category,
+	subcategories
+) {
+	try {
+		const result = await Subcategory.updateOne(
+			{ location, category },
+			{ $set: { subcategories } }
+		);
+
+		return {
+			success: result.modifiedCount === 1,
+		};
+	} catch (error) {
+		return {
+			success: false,
+			error: error,
+		};
+	}
+}
+
+export async function postNewSubcategory(location, category, subcat) {
+	try {
+		let data;
+		const result = await Subcategory.findOne({ location, category });
+
+		if (result) {
+			result.subcategories.push([subcat, false]);
+			await result.save();
+			data = result.subcategories;
+		} else {
+			const newSubcategory = new Subcategory({
+				location,
+				category,
+				subcategories: [[subcat, false]],
+			});
+			await newSubcategory.save();
+			data = newSubcategory.subcategories;
+		}
+
+		return {
+			success: true,
+			data,
+		};
+	} catch (error) {
+		return {
+			success: false,
+			error: error,
+		};
+	}
 }
