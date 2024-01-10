@@ -7,6 +7,7 @@ import { PORT } from "./config/secrets.js";
 import { setupMongo } from "./config/mongo.js";
 import dayjs from "dayjs";
 import errorHandler from "./controllers/errorHandler.js";
+import { mw } from "request-ip";
 
 const app = express();
 
@@ -14,6 +15,8 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 setupMongo();
+
+app.use(mw());
 
 morgan.token("date", () => {
 	// Timezone: Asia/Kolkata
@@ -33,9 +36,15 @@ morgan.token("coloredStatus", (req, res) => {
 	return chalk[color].bold(statusCode);
 });
 
+morgan.token("ip", (req, res) => req.clientIp);
+
+morgan.token("user", (req) =>
+	req.header("Username") ? req.header("Username") : "LOGIN ATTEMPT"
+);
+
 app.use(
 	morgan(
-		"[:date] | :coloredMethod :url :coloredStatus :res[content-length] bytes :response-time ms"
+		"[:date] |  :ip - :user  |  :coloredMethod :url :coloredStatus :res[content-length] bytes :response-time ms"
 	)
 );
 
