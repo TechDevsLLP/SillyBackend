@@ -39,10 +39,11 @@ export async function getAllLocationCats(location) {
 export async function getAllCategories(location) {
 	try {
 		const resp = await Category.findOne({ location });
-		const data = resp.categories.map((cat) => {
-			if (cat.visible) return cat.name;
+		let data = [];
+		resp.categories.forEach((cat) => {
+			if (cat.visible) return data.push(cat.name);
 		});
-
+		
 		return {
 			success: true,
 			data,
